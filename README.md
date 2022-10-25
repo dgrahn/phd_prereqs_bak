@@ -10,6 +10,8 @@
 | CWE-469 | Medium     | Use of Pointer Subtraction to Determine Size                            |
 
 ### CWE-120: Buffer Copy without Checking Size of Input
+> The program copies an input buffer to an output buffer without verifying that the size of the input buffer is less than the size of the output buffer, leading to a buffer overflow.
+
 #### Examples
 ```c++
 char last_name[20];
@@ -32,6 +34,8 @@ gets(buf);
 ```
 
 ### CWE-119: Improper Restriction of Operations within the Bounds of a Memory Buffer
+> The software performs operations on a memory buffer, but it can read from or write to a memory location that is outside of the intended boundary of the buffer.
+
 #### Examples
 ```c++
 void host_lookup(char *user_supplied_addr) {
@@ -105,6 +109,8 @@ int getValueFromArray(int *array, int len, int index) {
 ```
 
 ### CWE-476: NULL Pointer Dereference
+> A NULL pointer dereference occurs when the application dereferences a pointer that it expects to be valid, but is NULL, typically causing a crash or exit.
+
 #### Examples
 ```c++
 void host_lookup(char *user_supplied_addr){
@@ -122,6 +128,8 @@ void host_lookup(char *user_supplied_addr){
 ```
 
 ### CWE-469: Use of Pointer Subtraction to Determine Size
+> The application subtracts one pointer from another in order to determine size, but this calculation can be incorrect if the pointers do not exist in the same memory chunk.
+
 #### Examples
 ```c++
 struct node {
