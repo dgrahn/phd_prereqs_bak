@@ -7,7 +7,7 @@
 | 119                | Improper Restriction of Operations within the Bounds of a Memory Buffer
 | 476                | [NULL Pointer Dereference](cwe_476.md)
 | 469                | [Use of Pointer Subtraction to Determine Size](cwe_469.md)
-| 20, 457, 805, etc. | Improver Input Validation, Use of Uninitialized Variable, Buffer Access with Incorrect Length Value, etc.
+| 20, 457, 805, etc. | Improper Input Validation, Use of Uninitialized Variable, Buffer Access with Incorrect Length Value, etc.
 
 ## Prerequisite Tasks
 
@@ -116,3 +116,12 @@
     * Identify potential integer overflow (680)
     * Identify untrusted source (822)
     * Identify value being obtained (822)
+
+### Major Tasks
+* Perform comparison between two explicit or implicit values (e.g., `x > y`)
+    * Values listed explicitly in the code
+    * Values that are calculable, even if symbolically, based on the code
+    * Values that are known to programmers or environments, but are not in the code.
+* Track variable value across multiple statements. (e.g., `x = 0; x++; y = 1; x += y`)
+    * Concrete values, explicitly calculable based on the code
+    * Symbolic values, based only on relationships and possible ranges
