@@ -1,8 +1,11 @@
-from lib.generator import Test1Generator
+from libs.generator import Test2Generator
+from libs.ast import *
+import random
 
 if __name__ == "__main__":
-    gen = Test1Generator()
+    gen = Test2Generator()
 
     for _ in range(1_000):
         ast = gen.generate()
-        print(ast.evaluate(), ast)
+        print('-' * 20)
+        print(ast, ' --> ', ast.evaluate())
