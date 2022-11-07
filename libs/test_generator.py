@@ -10,7 +10,7 @@ def do_50_50_test(gen, max_tests=10_000):
         try:
             node = gen.generate()
             is_true += int(node.evaluate())
-        except:
+        except ZeroDivisionError:
             pass
 
     assert pytest.approx(is_true / max_tests, 0.1) == 0.5
