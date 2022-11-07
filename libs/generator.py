@@ -22,7 +22,8 @@ class Generator:
         calc_node = CalculationNode.random(a, b)
         return AssignmentNode(var, calc_node)
 
-class Test1Generator(Generator):
+
+class Task1Generator(Generator):
     """Test 1 - Comparison of ints
     > Test performance of models on simple relational operations.
     ```c
@@ -41,7 +42,7 @@ class Test1Generator(Generator):
         return ComparisonNode(left, operator, right)
 
 
-class Test2Generator(Generator):
+class Task2Generator(Generator):
     def generate(self):
         x_var, y_var = VariableNode.random_variables(2)
 
@@ -61,7 +62,7 @@ class Test2Generator(Generator):
         return []
 
 @dataclass
-class Test3Generator(Test2Generator):
+class Task3Generator(Task2Generator):
     min_calcs: int = 1
     max_calcs: int = 5
     
@@ -75,7 +76,7 @@ class Test3Generator(Test2Generator):
         ]
 
 
-class Test4Generator(Test2Generator):
+class Task4Generator(Task2Generator):
     def extend(self, x_var, y_var):
         condition = self.random_comparison([
             x_var, y_var, ValueNode.random_int()
