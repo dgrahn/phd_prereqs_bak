@@ -8,14 +8,6 @@ class TestTest1Generator():
         self.gen = Test1Generator()
         self.max_rand = 100_000
 
-    def test_is_random(self):
-        results = set()
-        
-        for _ in range(self.max_rand):
-            results.add(self.gen.generate())
-        
-        assert len(results) == self.max_rand
-
     def test_is_50_50(self):
         # This tests to make sure each operator is 50/50
         is_true = defaultdict(int)

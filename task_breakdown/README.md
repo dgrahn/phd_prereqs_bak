@@ -161,8 +161,8 @@ Additional Variables
 ```c
 x = [number 1]
 y = [number 2]
-x += 1
-y *= 100
+x = x + 1
+y = y + 100
 y = x * 1
 x > y
 ```

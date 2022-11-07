@@ -1,38 +1,95 @@
 import random
 import string
+from dataclasses import dataclass
+from typing import Callable, List
 
 class Node:
-    def evaluate(self, env=None):
+    def evaluate(self, env:dict=None) -> bool:
+        """Evaluates the node
+
+        Args:
+            env (dict, optional): Dictionary to store variables. Defaults to None.
+
+        Returns:
+            bool: True or False
+        """
+        if env is None: env = {}
+        return self._evaluate(env)
+
+    def _evaluate(self, env:dict) -> bool:
+        """Internal evaluate with non-optional env."""
         raise NotImplementedError()
-    
-    def _get_env(self, env):
-        if env is None: return {}
-        return env
 
 
+@dataclass
 class AssignmentNode(Node):
+    variable: 'VariableNode'
+    value: Node
+
     @staticmethod
     def random_int(variable, min=-10_000, max=10_000):
+        """Assignment of variable to random integer"""
         value = ValueNode.random_int(min, max)
         return AssignmentNode(variable, value)
 
-    def __init__(self, variable, value):
-        assert isinstance(variable, VariableNode)
-        self.variable = variable
-        self.value = value
-    
+    def _evaluate(self, env):
+        env[self.variable.name] = self.value.evaluate(env)
+
     def __str__(self):
         return f'{self.variable} = {self.value}'
-    
-    def evaluate(self, env):
-        self._get_env(env)[self.variable.name] = self.value.evaluate()
-        return True
 
 
-class ComparisonNode(Node):
+@dataclass
+class OperatorNode(Node):
+    left: Node
+    operator: str
+    right: Node
+    operation: Callable
+
+    def __str__(self):
+        return f'{self.left} {self.operator} {self.right}'
+
+    def _evaluate(self, env):
+        l_val = self.left.evaluate(env)
+        r_val = self.right.evaluate(env)
+        return self.operation(l_val, r_val)
+
+
+class CalculationNode(OperatorNode):
+    OPERATORS = [ '+', '-', '*', '/', '%' ]
+
+    OPERATIONS = {
+        '+': lambda l, r: l + r,
+        '-': lambda l, r: l - r,
+        '*': lambda l, r: l * r,
+        '/': lambda l, r: l / r,
+        '%': lambda l, r: l % r,
+    }
+
+    @staticmethod
+    def random(left, right):
+        op = random.choice(CalculationNode.OPERATORS)
+        return CalculationNode(left, op, right)
+
+    def __init__(self, left, operator, right):
+        super().__init__(
+            left, operator, right,
+            CalculationNode.OPERATIONS[operator])
+
+
+class ComparisonNode(OperatorNode):
     RELATIONAL = [ '<', '<=', '>', '>=' ]
     EQUALITY = [ '==', '!=' ]
     ALL_OPERATORS = RELATIONAL + EQUALITY
+
+    OPERATIONS = {
+        '<' : lambda l, r: l <  r,
+        '<=': lambda l, r: l <= r,
+        '>' : lambda l, r: l >  r,
+        '>=': lambda l, r: l >= r,
+        '==': lambda l, r: l == r,
+        '!=': lambda l, r: l != r,
+    }
 
     @staticmethod
     def random(left, right, include_equality=False):
@@ -47,61 +104,66 @@ class ComparisonNode(Node):
             return random.choice(ComparisonNode.RELATIONAL)
 
     def __init__(self, left, operator, right):
-        assert operator in ComparisonNode.ALL_OPERATORS, 'Invalid Operator'
-        self.left = left
-        self.right = right
-        self.operator = operator
+        super().__init__(
+            left, operator, right,
+            ComparisonNode.OPERATIONS[operator])
+
+
+@dataclass
+class ConditionalNode(Node):
+    condition: Node
+    if_node: Node
+    else_node: Node
+
+    def _evaluate(self, env):
+        if self.condition.evaluate(env):
+            self.if_node.evaluate(env)
+        else:
+            self.else_node.evaluate(env)
+        return None
 
     def __str__(self):
-        return f'{self.left} {self.operator} {self.right}'
-
-    def evaluate(self, env=None):
-        l_val = self.left.evaluate(env)
-        r_val = self.right.evaluate(env)
-
-        if self.operator == '<' : return l_val <  r_val
-        if self.operator == '<=': return l_val <= r_val
-        if self.operator == '>' : return l_val >  r_val
-        if self.operator == '>=': return l_val >= r_val
-        if self.operator == '==': return l_val == r_val
-        if self.operator == '!=': return l_val != r_val
+        r = f'if ({self.condition}) {{\n'
+        r += f'\t{self.if_node}\n'
+        r += '} else {\n'
+        r += f'\t{self.else_node}\n'
+        r += '}'
+        return r
 
 
+@dataclass
 class SequenceNode(Node):
-    def __init__(self, nodes):
-        self.nodes = nodes
-    
+    nodes: List[Node]
+
     def __str__(self):
         return '\n'.join(str(n) for n in self.nodes)
-    
-    def evaluate(self, env=None):
-        env = self._get_env(env)
 
+    def _evaluate(self, env):
         result = None
         for node in self.nodes:
             result = node.evaluate(env)
-        
+
         return result
 
 
+@dataclass
 class ValueNode(Node):
-    def __init__(self, value):
-        self.value = value
-    
-    def __str__(self):
-        return str(self.value)
+    value: int
 
-    def __eq__(self, other):
-        return self.value == other.value
-
-    def evaluate(self, env=None):
-        return self.value
-    
     @staticmethod
     def random_int(min=-10_000, max=10_000):
         return ValueNode(random.randint(min, max))
 
+    def _evaluate(self, env):
+        return self.value
+
+    def __str__(self):
+        return str(self.value)
+
+
+@dataclass
 class VariableNode(Node):
+    name: str
     VARS = string.ascii_lowercase
 
     @staticmethod
@@ -115,12 +177,8 @@ class VariableNode(Node):
         random.shuffle(valid)
         return [ VariableNode(valid.pop()) for _ in range(count) ]
 
-    def __init__(self, name):
-        self.name = name
-    
-    def __str__(self):
-        return self.name
-    
-    def evaluate(self, env):
+    def _evaluate(self, env):
         return env[self.name]
 
+    def __str__(self):
+        return self.name
