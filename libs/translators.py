@@ -4,11 +4,6 @@ from typing import Any
 
 class Translator:
     def translate(self, node:Node) -> Any:
-        raise NotImplementedError()
-
-
-class CodeTranslator(Translator):
-    def translate(self, node:Node) -> Any:
         if isinstance(node, AssignmentNode): return self._assignment(node)
         if isinstance(node, CalculationNode): return self._calculation(node)
         if isinstance(node, ComparisonNode): return self._comparison(node)
@@ -44,7 +39,7 @@ class CodeTranslator(Translator):
         raise NotImplementedError('_variable_node')
 
 
-class BasicCTranslator(CodeTranslator):
+class BasicCTranslator(Translator):
     def _assignment(self, node:AssignmentNode) -> Any:
         return f'{node.variable} = {node.value};'
     
@@ -71,7 +66,7 @@ class BasicCTranslator(CodeTranslator):
         return node.name
 
 
-class PythonTranslator(CodeTranslator):
+class PythonTranslator(Translator):
     def _assignment(self, node:AssignmentNode) -> Any:
         return f'{node.variable} = {node.value}'
     
