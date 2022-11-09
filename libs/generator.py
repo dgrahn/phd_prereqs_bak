@@ -6,6 +6,10 @@ class Generator:
     def generate(self):
         raise NotImplementedError()
 
+    def generator(self):
+        while True:
+            yield self.generate()
+
     def random_comparison(self, values):
         a_var, b_var = random.sample(values, 2)
         return ComparisonNode.random(a_var, b_var)
