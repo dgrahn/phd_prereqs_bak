@@ -138,8 +138,8 @@ class BasicFeatureTranslator(Translator):
     def normalize(self, feats):
         # FIXME How do we handle unbounded numbers?
         feats = np.array(feats, dtype=np.float64)
-        feats[feats[:, 0] == self.NUMBER, 1] /= 20_000
-        feats[feats[:, 0] == self.NUMBER, 1] += 0.5
+        feats[feats[:, 0] == self.NUMBER, 1] /= 10_000
+        # feats[feats[:, 0] == self.NUMBER, 1] += 0.5
         feats[feats[:, 0] == self.OPERATOR, 1] /= len(self.IDS)
         feats[feats[:, 0] == self.VARIABLE, 1] /= len(self.VARS)
         feats[:, 0] /= 2
