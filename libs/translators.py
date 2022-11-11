@@ -1,5 +1,7 @@
 from .ast import *
 from typing import Any
+import numpy as np
+import string
 
 
 class Translator:
@@ -30,7 +32,7 @@ class Translator:
         raise NotImplementedError('_operator')
     
     def _sequence_node(self, node:SequenceNode) -> Any:
-        raise NotImplementedError('_sequence_node')
+        raise NotImplementedError('_value_node')
     
     def _value_node(self, node:ValueNode) -> Any:
         raise NotImplementedError('_value_node')
@@ -91,3 +93,54 @@ class PythonTranslator(Translator):
     def _variable_node(self, node:VariableNode) -> Any:
         return node.name
 
+
+class BasicFeatureTranslator(Translator):
+    IDS = { k:v for v, k in enumerate([
+            '<', '<=', '>', '>=', '==', '!=',
+            '=',
+            '+', '-', '*', '/', '%',
+    ]) }
+
+    VARS = { k:v for v, k in enumerate(string.ascii_lowercase) }
+    OPERATOR = 0
+    NUMBER = 1
+    VARIABLE = 2
+
+    def _get_operator(self, op):
+        return [[ self.OPERATOR, self.IDS[op] ]]
+
+    def _assignment(self, node:AssignmentNode) -> Any:
+        return self.translate(node.variable) \
+            + self._get_operator('=') \
+            + self.translate(node.value)
+    
+    def _conditional(self, node:ConditionalNode) -> Any:
+        raise NotImplementedError('_conditional')
+
+    def _operator(self, node:OperatorNode) -> Any:
+        return self.translate(node.left) \
+            + self._get_operator(node.operator) \
+            + self.translate(node.right)
+    
+    def _sequence_node(self, node:SequenceNode) -> Any:
+        feats = []
+        for child in node.nodes:
+            feats += self.translate(child)
+
+        return feats
+    
+    def _value_node(self, node:ValueNode) -> Any:
+        return [[ self.NUMBER, node.value ]]
+    
+    def _variable_node(self, node:VariableNode) -> Any:
+        return [[ self.VARIABLE, self.VARS[node.name] ]]
+    
+    def normalize(self, feats):
+        # FIXME How do we handle unbounded numbers?
+        feats = np.array(feats, dtype=np.float64)
+        feats[feats[:, 0] == self.NUMBER, 1] /= 20_000
+        feats[feats[:, 0] == self.NUMBER, 1] += 0.5
+        feats[feats[:, 0] == self.OPERATOR, 1] /= len(self.IDS)
+        feats[feats[:, 0] == self.VARIABLE, 1] /= len(self.VARS)
+        feats[:, 0] /= 2
+        return feats
