@@ -8,7 +8,7 @@ FIXME: Where are the failure conditions???
 
 | Model       | Task 1    | Task 2    | Task 3    | Task 4    |
 |-------------|-----------|-----------|-----------|-----------|
-| Simple MLP  | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
+| Simple MLP  | 🟢 0.9943 | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
 | CNN + MLP   | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
 | LSTM + MLP  | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
 | Transformer | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
