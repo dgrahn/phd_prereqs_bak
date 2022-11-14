@@ -132,7 +132,7 @@
 
 ## Method
 
-> **Hypothesis:** Existing MLAVD models are performing advanced pattern recognition, but do not 
+> **Hypothesis:** Existing MLAVD models are performing advanced pattern recognition, but do not have the capability to truly detect vulnerabilities.
 
 ### Test 1: Raw Comparisons
 > Test performance of models on simple relational operations.
