@@ -7,7 +7,7 @@ import tensorflow as tf
 
 if __name__ == "__main__":
 
-    # Set seed for reproducability
+    # Set seed for reproducibility
     tf.keras.utils.set_random_seed(42)
 
     # Create the task
