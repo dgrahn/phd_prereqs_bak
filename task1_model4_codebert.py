@@ -1,10 +1,13 @@
 from libs.ast import *
 from libs.generator import Task1Generator
-from libs.model import model1_mlp
-from libs.pipeline import dataset_generator
-from libs.translators import BasicFeatureTranslator
+from libs.models import model4_codebert
+from libs.pipeline import codebert_dataset
+from libs.translators import PythonTranslator
 import tensorflow as tf
+import numpy as np
 
+# Constants
+BATCH_SIZE = 32
 
 if __name__ == "__main__":
 
@@ -12,15 +15,14 @@ if __name__ == "__main__":
     tf.keras.utils.set_random_seed(42)
 
     # Create the task
-    task1 = Task1Generator()
-    trans = BasicFeatureTranslator()
+    task = Task1Generator()
+    trans = PythonTranslator()  
 
     # Create the pipeline    
-    pipe = dataset_generator(task1, trans)
-    pipe = pipe.batch(32)
+    pipe = codebert_dataset(task, trans, BATCH_SIZE)
 
     # Create the model
-    model = model1_mlp((3, 2))
+    model = model4_codebert()
     print(model.summary())
 
     # Compile the model
@@ -37,7 +39,7 @@ if __name__ == "__main__":
     # Train the model
     model.fit(
         pipe,
-        batch_size=32,
+        batch_size=BATCH_SIZE,
         epochs = 10,
         steps_per_epoch = 10_000,
         validation_data = pipe,

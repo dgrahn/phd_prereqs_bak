@@ -99,6 +99,7 @@ class BasicFeatureTranslator(Translator):
             '<', '<=', '>', '>=', '==', '!=',
             '=',
             '+', '-', '*', '/', '%',
+            'if', 'do', 'else', 'end',
     ]) }
 
     VARS = { k:v for v, k in enumerate(string.ascii_lowercase) }
@@ -115,7 +116,13 @@ class BasicFeatureTranslator(Translator):
             + self.translate(node.value)
     
     def _conditional(self, node:ConditionalNode) -> Any:
-        raise NotImplementedError('_conditional')
+        return self._get_operator('if') \
+            + self.translate(node.condition) \
+            + self._get_operator('do') \
+            + self.translate(node.if_node) \
+            + self._get_operator('else') \
+            + self.translate(node.else_node) \
+            + self._get_operator('end')
 
     def _operator(self, node:OperatorNode) -> Any:
         return self.translate(node.left) \

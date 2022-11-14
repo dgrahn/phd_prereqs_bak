@@ -1,6 +1,5 @@
 from libs.ast import *
-from libs.generator import Task1Generator
-from libs.model import model1_mlp
+from libs.generator import Task4Generator
 from libs.pipeline import dataset_generator
 from libs.translators import BasicFeatureTranslator
 import tensorflow as tf
@@ -12,7 +11,7 @@ if __name__ == "__main__":
     tf.keras.utils.set_random_seed(42)
 
     # Create the task
-    task1 = Task1Generator()
+    task1 = Task4Generator()
     trans = BasicFeatureTranslator()
 
     # Create the pipeline    
@@ -20,7 +19,13 @@ if __name__ == "__main__":
     pipe = pipe.batch(32)
 
     # Create the model
-    model = model1_mlp((3, 2))
+    inputs = tf.keras.Input(shape=(26, 2))
+    x = tf.keras.layers.Flatten()(inputs)
+    x = tf.keras.layers.Dense(64, activation='relu')(x)
+    x = tf.keras.layers.Dense(32, activation='relu')(x)
+    x = tf.keras.layers.Dense(16, activation='relu')(x)
+    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
     print(model.summary())
 
     # Compile the model
