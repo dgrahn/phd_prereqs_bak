@@ -5,6 +5,8 @@ from libs.pipeline import dataset_generator
 from libs.translators import BasicFeatureTranslator
 import tensorflow as tf
 
+# Constants
+BATCH_SIZE = 32
 
 if __name__ == "__main__":
 
@@ -12,12 +14,12 @@ if __name__ == "__main__":
     tf.keras.utils.set_random_seed(42)
 
     # Create the task
-    task1 = Task1Generator()
+    task = Task1Generator()
     trans = BasicFeatureTranslator()
 
     # Create the pipeline    
-    pipe = dataset_generator(task1, trans)
-    pipe = pipe.batch(32)
+    pipe = dataset_generator(task, trans)
+    pipe = pipe.batch(BATCH_SIZE)
 
     # Create the model
     model = model1_mlp((3, 2))
@@ -37,7 +39,7 @@ if __name__ == "__main__":
     # Train the model
     model.fit(
         pipe,
-        batch_size=32,
+        batch_size=BATCH_SIZE,
         epochs = 10,
         steps_per_epoch = 10_000,
         validation_data = pipe,

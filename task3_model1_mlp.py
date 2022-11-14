@@ -1,9 +1,12 @@
 from libs.ast import *
 from libs.generator import Task3Generator
+from libs.model import model1_mlp
 from libs.pipeline import dataset_generator
 from libs.translators import BasicFeatureTranslator
 import tensorflow as tf
 
+# Constants
+BATCH_SIZE = 32
 
 if __name__ == "__main__":
 
@@ -16,16 +19,10 @@ if __name__ == "__main__":
 
     # Create the pipeline    
     pipe = dataset_generator(task1, trans, max_size=34)
-    pipe = pipe.batch(32)
+    pipe = pipe.batch(BATCH_SIZE)
 
     # Create the model
-    inputs = tf.keras.Input(shape=(34, 2))
-    x = tf.keras.layers.Flatten()(inputs)
-    x = tf.keras.layers.Dense(64, activation='relu')(x)
-    x = tf.keras.layers.Dense(32, activation='relu')(x)
-    x = tf.keras.layers.Dense(16, activation='relu')(x)
-    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    model = model1_mlp((34, 2))
     print(model.summary())
 
     # Compile the model
@@ -42,7 +39,7 @@ if __name__ == "__main__":
     # Train the model
     model.fit(
         pipe,
-        batch_size=32,
+        batch_size=BATCH_SIZE,
         epochs = 10,
         steps_per_epoch = 10_000,
         validation_data = pipe,
