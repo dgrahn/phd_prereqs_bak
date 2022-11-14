@@ -1,24 +1,26 @@
 # PhD Vulnerability Detection Prerequisites
 
+## TODO
+* Identify failure conditions for successful training. They should be fully learnable problems as there is zero noise.
+
 
 ## Results
 
-FIXME: Where are the failure conditions???
+Metric is binary accuracy, all datasets are balanced.
 
-
-| Model       | Task 1    | Task 2    | Task 3    | Task 4    |
-|-------------|-----------|-----------|-----------|-----------|
-| Simple MLP  | 🟢 0.9943 | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
-| CNN + MLP   | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
-| LSTM + MLP  | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
-| Transformer | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
-| GNN         | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
+| # | Model       | Task 1    | Task 2    | Task 3    | Task 4    |
+|---|-------------|-----------|-----------|-----------|-----------|
+| 1 | Simple MLP  | 🟢 0.9968 | 🟢 0.9968 | 🔴 0.5068 | ⚪ 0.xxxx |
+| 2 | CNN + MLP   | 🟢 0.9965 | 🟢 0.9952 | 🔴 0.5068 | ⚪ 0.xxxx |
+| 3 | LSTM + MLP  | 🟢 0.9938 | 🔴 0.5027 | 🔴 0.5068 | ⚪ 0.xxxx |
+| 4 | Transformer | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
+| 5 | GNN         | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
 
 ### Legend
-* 🟢 > 0.95
-* 🟡 > 0.80
-* 🟠 > 0.50
-* 🔴 = 0.50
+* 🟢 >= 0.95
+* 🟡 >= 0.80
+* 🟠 ~> 0.50
+* 🔴 ~= 0.50 (Due to size of sample, may not be exactly 0.5000)
 * ⚪ Untested
 
 
