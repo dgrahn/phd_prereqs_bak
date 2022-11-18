@@ -7,8 +7,7 @@ def model1_mlp(input_shape):
     x = tf.keras.layers.Dense(32, activation='relu')(x)
     x = tf.keras.layers.Dense(16, activation='relu')(x)
     outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
-    model = tf.keras.Model(inputs=inputs, outputs=outputs)
-    print(model.summary())
+    return tf.keras.Model(inputs=inputs, outputs=outputs)
 
 def model4_codebert(seq_length=512):
     from transformers import TFRobertaModel
@@ -19,7 +18,7 @@ def model4_codebert(seq_length=512):
 
     # Load pretrained core
     roberta_core = TFRobertaModel.from_pretrained("microsoft/codebert-base")
-    roberta_core.trainable = False
+    # roberta_core.trainable = False
 
     # Create a short classification MLP
     out = roberta_core([input_word_ids, input_mask])
