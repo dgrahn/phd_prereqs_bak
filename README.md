@@ -2,8 +2,8 @@
 
 ## TODO
 * Identify failure conditions for successful training. They should be fully learnable problems as there is zero noise.
-* Double check Task 2, Model 3 metrics
-* Try training CodeBERT with no frozen weights
+* Try training CodeBERT with no frozen weights (running on fry now)
+* Simplify code
 
 
 ## Results
@@ -14,8 +14,8 @@ Metric is binary accuracy, all datasets are balanced.
 |---|-------------|-----------|-----------|-----------|-----------|
 | 1 | Simple MLP  | 🟢 0.9968 | 🟢 0.9968 | 🔴 0.5068 | 🔴 0.5080 |
 | 2 | CNN + MLP   | 🟢 0.9965 | 🟢 0.9952 | 🔴 0.5068 | 🔴 0.5080 |
-| 3 | LSTM + MLP  | 🟢 0.9938 | 🔴 0.5027 | 🔴 0.5068 | 🔴 0.5080 |
-| 4 | CodeBERT    | 🔴 0.5052 | 🔴 0.5054 | ⚪ 0.xxxx | ⚪ 0.xxxx |
+| 3 | LSTM + MLP  | 🟢 0.9938 | 🔴 0.5052 | 🔴 0.5068 | 🔴 0.5080 |
+| 4 | CodeBERT    | 🔴 0.5052 | 🔴 0.5054 | 🔴 0.5067 | 🟣 0.xxxx |
 | 5 | GNN         | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx | ⚪ 0.xxxx |
 
 ### Legend

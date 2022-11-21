@@ -36,12 +36,19 @@ def codebert_dataset(task, trans, batch_size):
         labels = np.zeros((batch_size,))
 
         for i in range(batch_size):
-            ast = task.generate()
-            python = trans.translate(ast)
-            record = tokenizer(python, padding="max_length", truncation=True)
-            input_ids[i, :] = record['input_ids']
-            attention_mask[i, :] = record['attention_mask']
-            labels[i] = int(ast.evaluate())
+            retry = True
+            while retry:
+                try:
+                    ast = task.generate()
+                    labels[i] = int(ast.evaluate())
+                    python = trans.translate(ast)
+                    record = tokenizer(python, padding="max_length", truncation=True)
+                    input_ids[i, :] = record['input_ids']
+                    attention_mask[i, :] = record['attention_mask']
+                    retry = False
+                except ZeroDivisionError:
+                    pass
+
 
         yield {
             'input_ids': np.array(input_ids),
