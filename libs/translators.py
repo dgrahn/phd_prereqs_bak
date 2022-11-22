@@ -6,21 +6,24 @@ import string
 
 class Translator:
     def translate(self, node:Node) -> Any:
-        if isinstance(node, AssignmentNode): return self._assignment(node)
-        if isinstance(node, CalculationNode): return self._calculation(node)
-        if isinstance(node, ComparisonNode): return self._comparison(node)
-        if isinstance(node, ConditionalNode): return self._conditional(node)
-        if isinstance(node, OperatorNode): return self._operator(node)
-        if isinstance(node, SequenceNode): return self._sequence_node(node)
-        if isinstance(node, ValueNode): return self._value_node(node)
-        if isinstance(node, VariableNode): return self._variable_node(node)
+        return self._translate(node)
+
+    def _translate(self, node:Node, **kwargs) -> Any:
+        if isinstance(node, AssignmentNode): return self._assignment(node, **kwargs)
+        if isinstance(node, CalculationNode): return self._calculation(node, **kwargs)
+        if isinstance(node, ComparisonNode): return self._comparison(node, **kwargs)
+        if isinstance(node, ConditionalNode): return self._conditional(node, **kwargs)
+        if isinstance(node, OperatorNode): return self._operator(node, **kwargs)
+        if isinstance(node, SequenceNode): return self._sequence_node(node, **kwargs)
+        if isinstance(node, ValueNode): return self._value_node(node, **kwargs)
+        if isinstance(node, VariableNode): return self._variable_node(node, **kwargs)
         raise NotImplementedError(f'Invalid type: {type(node)}')
 
-    def _calculation(self, node:CalculationNode) -> Any:
-        return self._operator(node)
+    def _calculation(self, node:CalculationNode, **kwargs) -> Any:
+        return self._operator(node, **kwargs)
     
-    def _comparison(self, node:ComparisonNode) -> Any:
-        return self._operator(node)
+    def _comparison(self, node:ComparisonNode, **kwargs) -> Any:
+        return self._operator(node, **kwargs)
 
     def _assignment(self, node:AssignmentNode) -> Any:
         raise NotImplementedError('_assignment')        
@@ -46,20 +49,20 @@ class BasicCTranslator(Translator):
         return f'{node.variable} = {node.value};'
     
     def _conditional(self, node:ConditionalNode) -> Any:
-        r = f'if ({self.translate(node.condition)}) {{\n'
-        r += f'\t{self.translate(node.if_node)}\n'
+        r = f'if ({self._translate(node.condition)}) {{\n'
+        r += f'\t{self._translate(node.if_node)}\n'
         r += '} else {\n'
-        r += f'\t{self.translate(node.else_node)}\n'
+        r += f'\t{self._translate(node.else_node)}\n'
         r += '}'
         return r
 
     def _operator(self, node:OperatorNode) -> Any:
-        l_val = self.translate(node.left)
-        r_val = self.translate(node.right)
+        l_val = self._translate(node.left)
+        r_val = self._translate(node.right)
         return f'{l_val} {node.operator} {r_val}'
     
     def _sequence_node(self, node:SequenceNode) -> Any:
-        return '\n'.join(self.translate(n) for n in node.nodes)
+        return '\n'.join(self._translate(n) for n in node.nodes)
     
     def _value_node(self, node:ValueNode) -> Any:
         return str(node.value)
@@ -73,19 +76,19 @@ class PythonTranslator(Translator):
         return f'{node.variable} = {node.value}'
     
     def _conditional(self, node:ConditionalNode) -> Any:
-        r = f'if {self.translate(node.condition)}:\n'
-        r += f'\t{self.translate(node.if_node)}\n'
+        r = f'if {self._translate(node.condition)}:\n'
+        r += f'\t{self._translate(node.if_node)}\n'
         r += 'else:\n'
-        r += f'\t{self.translate(node.else_node)}'
+        r += f'\t{self._translate(node.else_node)}'
         return r
 
     def _operator(self, node:OperatorNode) -> Any:
-        l_val = self.translate(node.left)
-        r_val = self.translate(node.right)
+        l_val = self._translate(node.left)
+        r_val = self._translate(node.right)
         return f'{l_val} {node.operator} {r_val}'
     
     def _sequence_node(self, node:SequenceNode) -> Any:
-        return '\n'.join(self.translate(n) for n in node.nodes)
+        return '\n'.join(self._translate(n) for n in node.nodes)
     
     def _value_node(self, node:ValueNode) -> Any:
         return str(node.value)
@@ -111,28 +114,28 @@ class BasicFeatureTranslator(Translator):
         return [[ self.OPERATOR, self.IDS[op] ]]
 
     def _assignment(self, node:AssignmentNode) -> Any:
-        return self.translate(node.variable) \
+        return self._translate(node.variable) \
             + self._get_operator('=') \
-            + self.translate(node.value)
+            + self._translate(node.value)
     
     def _conditional(self, node:ConditionalNode) -> Any:
         return self._get_operator('if') \
-            + self.translate(node.condition) \
+            + self._translate(node.condition) \
             + self._get_operator('do') \
-            + self.translate(node.if_node) \
+            + self._translate(node.if_node) \
             + self._get_operator('else') \
-            + self.translate(node.else_node) \
+            + self._translate(node.else_node) \
             + self._get_operator('end')
 
     def _operator(self, node:OperatorNode) -> Any:
-        return self.translate(node.left) \
+        return self._translate(node.left) \
             + self._get_operator(node.operator) \
-            + self.translate(node.right)
+            + self._translate(node.right)
     
     def _sequence_node(self, node:SequenceNode) -> Any:
         feats = []
         for child in node.nodes:
-            feats += self.translate(child)
+            feats += self._translate(child)
 
         return feats
     
