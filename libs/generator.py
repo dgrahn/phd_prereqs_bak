@@ -85,7 +85,9 @@ class Task4Generator(Task2Generator):
         condition = self.random_comparison([
             x_var, y_var, ValueNode.random_int()
         ])
-        if_node = SequenceNode([self.random_calculation([ x_var, y_var ])])
-        else_node = SequenceNode([self.random_calculation([ x_var, y_var ])])
+        if_node = self.random_calculation([ x_var, y_var ])
+        else_node = self.random_calculation([ x_var, y_var ])
+        # if_node = SequenceNode([self.random_calculation([ x_var, y_var ])])
+        # else_node = SequenceNode([self.random_calculation([ x_var, y_var ])])
 
         return [ ConditionalNode(condition, if_node, else_node) ]

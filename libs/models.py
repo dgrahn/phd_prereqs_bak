@@ -9,6 +9,26 @@ def model1_mlp(input_shape):
     outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
     return tf.keras.Model(inputs=inputs, outputs=outputs)
 
+def model2_cnn(input_shape):
+    inputs = tf.keras.Input(shape=input_shape)
+    x = tf.keras.layers.Conv1D(128, 3, activation='relu')(inputs)
+    x = tf.keras.layers.Flatten()(x)
+    x = tf.keras.layers.Dense(64, activation='relu')(x)
+    x = tf.keras.layers.Dense(32, activation='relu')(x)
+    x = tf.keras.layers.Dense(16, activation='relu')(x)
+    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+    return tf.keras.Model(inputs=inputs, outputs=outputs)
+
+def model3_lstm(input_shape):
+    inputs = tf.keras.Input(shape=input_shape)
+    x = tf.keras.layers.LSTM(128)(inputs)
+    x = tf.keras.layers.Flatten()(x)
+    x = tf.keras.layers.Dense(64, activation='relu')(x)
+    x = tf.keras.layers.Dense(32, activation='relu')(x)
+    x = tf.keras.layers.Dense(16, activation='relu')(x)
+    outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
+    return tf.keras.Model(inputs=inputs, outputs=outputs)
+
 def model4_codebert(seq_length=512):
     from transformers import TFRobertaModel
 

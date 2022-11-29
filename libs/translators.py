@@ -1,5 +1,7 @@
 from .ast import *
+from collections import defaultdict, namedtuple
 from typing import Any
+import networkx as nx
 import numpy as np
 import string
 
@@ -154,3 +156,94 @@ class BasicFeatureTranslator(Translator):
         feats[feats[:, 0] == self.VARIABLE, 1] /= len(self.VARS)
         feats[:, 0] /= 2
         return feats
+
+
+
+Nodes = namedtuple('Nodes', ['ast', 'cfg'])
+
+class NetworkXTranslator(Translator):
+    def translate(self, node):
+        print('Translating')
+        self.G = nx.DiGraph()
+        self.node = 0
+        self.last_refs = defaultdict(lambda: None)
+        self._translate(node)
+        return self.G
+
+    def add_node(self, label, **kwargs):
+        self.node += 1
+        self.G.add_node(self.node, label=label, **kwargs)
+        return self.node
+    
+    def add_cfg(self, nids, nodes, **kwargs):
+        for nid in nids:
+            for cfg in nodes.cfg:
+                self.G.add_edge(nid, cfg, label='CFG', **kwargs)
+    
+    def add_ast(self, nid, nodes, **kwargs):
+        for ast in nodes.ast:
+            self.G.add_edge(nid, ast, label='AST', **kwargs)
+    
+    def add_cdf(self, source, target, **kwargs):
+        self.G.add_edge(source, target, label='CDG', **kwargs)
+
+    def _assignment(self, node:AssignmentNode, **kwargs) -> Any:
+        assign = self.add_node('ASSIGN', **kwargs)
+        variable = self._translate(node.variable, order=0, assign=True)
+        value = self._translate(node.value, order=1)
+
+        self.last_refs[node.variable.name] = assign
+
+        self.add_ast(assign, variable)
+        self.add_ast(assign, value)
+        return Nodes(ast=[assign], cfg=[assign])
+        # return f'{node.variable} = {node.value}'
+    
+    def _conditional(self, node:ConditionalNode, **kwargs) -> Any:
+        if_id = self.add_node('IFELSE')
+        cond_id = self._translate(node.condition)
+        if_node = self._translate(node.if_node)
+        else_node = self._translate(node.else_node)
+
+        self.add_ast(if_id, cond_id, type='CONDITION')
+        self.add_ast(if_id, if_node, type='IF')
+        self.add_ast(if_id, else_node, type='ELSE')
+
+        self.add_cdf(if_node.cfg[0], cond_id.ast[0], value='true')
+        self.add_cdf(else_node.cfg[0], cond_id.ast[0], value='false')
+
+        return Nodes(ast=[if_id], cfg=if_node.cfg + else_node.cfg)
+
+    def _operator(self, node:OperatorNode, **kwargs) -> Any:
+        op_node = self.add_node('OPERATOR')
+        l_node = self._translate(node.left, order=0)
+        r_node = self._translate(node.right, order=1)
+
+        self.add_ast(op_node, l_node)
+        self.add_ast(op_node, r_node)
+        return Nodes(ast=[op_node], cfg=[op_node])
+    
+    def _sequence_node(self, node:SequenceNode) -> Any:
+        block = self.add_node('BLOCK')
+        last_cfg = []
+        for i, node in enumerate(node.nodes):
+            statement = self._translate(node, order=i)
+            self.add_ast(block, statement)
+            self.add_cfg(last_cfg, statement)
+            last_cfg = statement.cfg
+        return Nodes(ast=[block], cfg=last_cfg)
+    
+    def _value_node(self, node:ValueNode, **kwargs) -> Any:
+        nid = self.add_node('VALUE', value=node.value, **kwargs)
+        return Nodes(ast=[nid], cfg=[])
+    
+    def _variable_node(self, node:VariableNode, **kwargs) -> Any:
+        is_assign = kwargs.pop('assign', False)
+
+        nid = self.add_node('VARIABLE', var=node.name, **kwargs)
+
+        last_ref = self.last_refs[node.name]
+        if last_ref and not is_assign:
+            self.add_cdf(nid, last_ref)
+
+        return Nodes(ast=[nid], cfg=[])
