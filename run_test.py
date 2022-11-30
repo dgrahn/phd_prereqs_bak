@@ -76,6 +76,8 @@ def run_test(args):
     # Train the model
     do_train(model, pipe, BATCH_SIZE)
 
+    print(f'Complete model={args.model}, task={args.task}')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog='Prereq Task Runner')
