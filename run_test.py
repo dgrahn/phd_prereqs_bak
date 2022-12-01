@@ -1,6 +1,3 @@
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
 from libs import generator, models, translators
 from libs.pipeline import dataset_generator, codebert_dataset
 from libs.train import do_train
