@@ -1,37 +1,39 @@
 from libs import generator, models, translators
-from libs.pipeline import dataset_generator, codebert_dataset
+from libs.pipeline import dataset_generator, codebert_dataset, spektral_loader
 from libs.train import do_train
 import argparse
+import spektral
 import sys
 import tensorflow as tf
 
 # Constants
 BATCH_SIZE = 32
+EPOCHS = 10
+STEPS_PER_EPOCH = 10_000
+VALIDATION_STEPS = 1_000
 
-def task1_basic():
-    task = generator.Task1Generator()
+def basic(task, **kwargs):
     trans = translators.BasicFeatureTranslator()
-    return dataset_generator(task, trans)
-
-def task2_basic():
-    task = generator.Task2Generator()
-    trans = translators.BasicFeatureTranslator()
-    return dataset_generator(task, trans)
-
-def task3_basic():
-    task = generator.Task3Generator()
-    trans = translators.BasicFeatureTranslator()
-    return dataset_generator(task, trans, max_size=34)
-
-def task4_basic():
-    task = generator.Task4Generator()
-    trans = translators.BasicFeatureTranslator()
-    return dataset_generator(task, trans)
+    return dataset_generator(task, trans, **kwargs)
+ 
+task1_basic = lambda: basic(generator.Task1Generator())
+task2_basic = lambda: basic(generator.Task2Generator())
+task3_basic = lambda: basic(generator.Task3Generator(), max_size=34)
+task4_basic = lambda: basic(generator.Task4Generator())
 
 def model4(task):
     trans = translators.PythonTranslator()
     pipe = codebert_dataset(task, trans, BATCH_SIZE)
     return models.model4_codebert(), pipe
+
+def model5(task):
+    trans = translators.SpektralTranslator()
+    dataset, loader = spektral_loader(task, trans,
+        batch_size=BATCH_SIZE, epochs=EPOCHS,
+        train_size=STEPS_PER_EPOCH, test_size=VALIDATION_STEPS)
+
+    model = models.model5_gnn(dataset.n_node_features, dataset.n_edge_features)
+    return model, loader
 
 model1_task1 = lambda: (models.model1_mlp((3, 2)), task1_basic())
 model1_task2 = lambda: (models.model1_mlp((9, 2)), task2_basic())
@@ -49,11 +51,10 @@ model4_task1 = lambda: model4(generator.Task1Generator())
 model4_task2 = lambda: model4(generator.Task2Generator())
 model4_task3 = lambda: model4(generator.Task3Generator())
 model4_task4 = lambda: model4(generator.Task4Generator())
-
-def model5_task1(): raise NotImplementedError()
-def model5_task2(): raise NotImplementedError()
-def model5_task3(): raise NotImplementedError()
-def model5_task4(): raise NotImplementedError()
+model5_task1 = lambda: model5(generator.Task1Generator())
+model5_task2 = lambda: model5(generator.Task2Generator())
+model5_task3 = lambda: model5(generator.Task3Generator())
+model5_task4 = lambda: model5(generator.Task4Generator())
 
 
 def run_test(args):
@@ -65,13 +66,18 @@ def run_test(args):
     model, pipe = getattr(sys.modules[__name__], func_name)()
 
     # Batch the pipeline
-    pipe = pipe.batch(BATCH_SIZE)
+    if not isinstance(pipe, spektral.data.loaders.Loader):
+        pipe = pipe.batch(BATCH_SIZE)
 
     # Describe the model
     print(model.summary())
 
     # Train the model
-    do_train(model, pipe, BATCH_SIZE)
+    do_train(model, pipe, BATCH_SIZE,
+        epochs = EPOCHS,
+        steps_per_epoch = STEPS_PER_EPOCH,
+        validation_steps = VALIDATION_STEPS,
+    )
 
     print(f'Complete model={args.model}, task={args.task}')
 

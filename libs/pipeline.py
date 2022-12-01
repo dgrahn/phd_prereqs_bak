@@ -1,6 +1,29 @@
-import numpy as np
-import tensorflow as tf
+from tqdm import tqdm
 from transformers import RobertaTokenizer
+import numpy as np
+import spektral
+import tensorflow as tf
+
+class SpektralTaskDataset(spektral.data.dataset.Dataset):
+    def __init__(self, task, trans, epochs, train_size, test_size):
+        self.task = task
+        self.trans = trans
+        self.num_examples = epochs * (train_size + test_size)
+
+        self.graphs = []
+
+        with tqdm(total=self.num_examples) as pbar:
+            while len(self.graphs) < self.num_examples:
+                try:
+                    ast = self.task.generate()
+                    g = self.trans.translate(ast)
+                    self.graphs.append(g)
+                    pbar.update(1)
+                except ZeroDivisionError:
+                    pass
+    
+    def read(self):
+        return self.graphs
 
 def dataset_generator(gen, trans, max_size=None, do_normalize=True):
     def gen_fn():
@@ -54,3 +77,15 @@ def codebert_dataset(task, trans, batch_size):
             'input_ids': np.array(input_ids),
             'attention_mask': np.array(attention_mask),
         }, np.array(labels)
+
+def spektral_loader(task, trans, batch_size, epochs, train_size, test_size):
+    dataset = SpektralTaskDataset(task, trans, epochs=epochs, train_size=train_size, test_size=test_size)
+    print('# Graphs:', dataset.n_graphs)
+    print('# Labels:', dataset.n_labels)
+    print('# Node Features:', dataset.n_node_features)
+    print('# Edge Features:', dataset.n_edge_features)
+    # print('# Nodes:', dataset.n_nodes)
+    print('# Examples:', dataset.num_examples)
+    print(dataset)
+
+    return dataset, spektral.data.BatchLoader(dataset, batch_size=batch_size, shuffle=False)

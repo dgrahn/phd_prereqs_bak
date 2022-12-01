@@ -48,3 +48,17 @@ def model4_codebert(seq_length=512):
     out = tf.keras.layers.Dense(1, name='output', activation='sigmoid')(out)
 
     return tf.keras.Model(inputs=[input_word_ids, input_mask], outputs=out)
+
+def model5_gnn(n_node_features, n_edge_features):
+    import spektral
+    X_in = tf.keras.layers.Input(shape=(n_node_features,))
+    A_in = tf.keras.layers.Input(shape=(None,), sparse=True)
+    E_in = tf.keras.layers.Input(shape=(n_edge_features,))
+    I_in = tf.keras.layers.Input(shape=(), dtype=tf.int64)
+
+    X_1 = spektral.layers.ECCConv(32, activation='relu')([X_in, A_in, E_in])
+    X_2 = spektral.layers.ECCConv(32, activation='relu')([X_1, A_in, E_in])
+    X_3 = spektral.layers.GlobalSumPool()(X_2)
+    output = tf.keras.layers.Dense(1, activation='sigmoid')(X_3)
+
+    return tf.keras.models.Model(inputs=[X_in, A_in, E_in], outputs=output)

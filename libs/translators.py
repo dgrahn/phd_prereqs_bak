@@ -3,7 +3,9 @@ from collections import defaultdict, namedtuple
 from typing import Any
 import networkx as nx
 import numpy as np
-import string
+import pandas as pd
+import spektral
+import string 
 
 
 class Translator:
@@ -163,7 +165,6 @@ Nodes = namedtuple('Nodes', ['ast', 'cfg'])
 
 class NetworkXTranslator(Translator):
     def translate(self, node):
-        print('Translating')
         self.G = nx.DiGraph()
         self.node = 0
         self.last_refs = defaultdict(lambda: None)
@@ -205,9 +206,9 @@ class NetworkXTranslator(Translator):
         if_node = self._translate(node.if_node)
         else_node = self._translate(node.else_node)
 
-        self.add_ast(if_id, cond_id, type='CONDITION')
-        self.add_ast(if_id, if_node, type='IF')
-        self.add_ast(if_id, else_node, type='ELSE')
+        self.add_ast(if_id, cond_id, value='CONDITION')
+        self.add_ast(if_id, if_node, value='IF')
+        self.add_ast(if_id, else_node, value='ELSE')
 
         self.add_cdf(if_node.cfg[0], cond_id.ast[0], value='true')
         self.add_cdf(else_node.cfg[0], cond_id.ast[0], value='false')
@@ -215,7 +216,7 @@ class NetworkXTranslator(Translator):
         return Nodes(ast=[if_id], cfg=if_node.cfg + else_node.cfg)
 
     def _operator(self, node:OperatorNode, **kwargs) -> Any:
-        op_node = self.add_node('OPERATOR')
+        op_node = self.add_node('OPERATOR', type=node.operator)
         l_node = self._translate(node.left, order=0)
         r_node = self._translate(node.right, order=1)
 
@@ -240,10 +241,52 @@ class NetworkXTranslator(Translator):
     def _variable_node(self, node:VariableNode, **kwargs) -> Any:
         is_assign = kwargs.pop('assign', False)
 
-        nid = self.add_node('VARIABLE', var=node.name, **kwargs)
+        nid = self.add_node('VARIABLE', name=node.name, **kwargs)
 
         last_ref = self.last_refs[node.name]
         if last_ref and not is_assign:
             self.add_cdf(nid, last_ref)
 
         return Nodes(ast=[nid], cfg=[])
+
+class SpektralTranslator(NetworkXTranslator):
+    NODE_LABELS = { k:v for v, k in enumerate([
+        'ASSIGN', 'BLOCK', 'IFELSE', 'OPERATOR', 'VARIABLE',
+        'VALUE'
+    ])}
+
+    EDGE_LABELS = { 'AST': 0, 'CFG': 1, 'CDG': 2 }
+    VALUES = { 'CONDITION': 0, 'IF': 1, 'ELSE': 2, 'true': 3, 'false': 4 }
+
+    def map(self, df, name, labels, has_na=False):
+        if name not in df.columns: return
+
+        seq = df[name].map(labels.get)
+
+        if has_na:
+            df[name] = (seq + 1).fillna(0) / len(labels)
+        else:
+            df[name] = seq / (len(labels) - 1)
+
+    def translate(self, node):
+        g = super().translate(node)
+
+        df_edges = nx.to_pandas_edgelist(g)
+        self.map(df_edges, 'label', SpektralTranslator.EDGE_LABELS)
+        self.map(df_edges, 'value', SpektralTranslator.VALUES, True)
+
+        df_nodes = pd.DataFrame.from_dict(g.nodes, orient='index')
+        self.map(df_nodes, 'label', SpektralTranslator.NODE_LABELS)
+        self.map(df_nodes, 'name', BasicFeatureTranslator.VARS, True)
+        self.map(df_nodes, 'type', BasicFeatureTranslator.IDS, True)
+        df_nodes.value = (df_nodes.value / 10_000).fillna(-2)
+
+        df_nodes.order += 1
+        df_nodes.order = df_nodes.order.fillna(0) / df_nodes.order.max()
+
+        return spektral.data.Graph(
+            a = nx.adjacency_matrix(g), # Adjacency matrix
+            x = df_nodes.values, # Node features
+            e = df_edges.values[:, 2:], # Edge features
+            y = [int(node.evaluate())], # Labels
+        )
