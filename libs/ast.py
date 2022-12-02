@@ -117,10 +117,9 @@ class ConditionalNode(Node):
 
     def _evaluate(self, env):
         if self.condition.evaluate(env):
-            self.if_node.evaluate(env)
+            return self.if_node.evaluate(env)
         else:
-            self.else_node.evaluate(env)
-        return None
+            return self.else_node.evaluate(env)
 
     def __str__(self):
         r = f'if ({self.condition}) {{\n'
