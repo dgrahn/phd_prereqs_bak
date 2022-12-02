@@ -91,3 +91,25 @@ class Task4Generator(Task2Generator):
         # else_node = SequenceNode([self.random_calculation([ x_var, y_var ])])
 
         return [ ConditionalNode(condition, if_node, else_node) ]
+
+class Task5Generator(Generator):
+    def generate(self):
+        variables = VariableNode.random_variables(4)
+        random.shuffle(variables)
+
+        condition = self.random_comparison(random.choices(variables, k=2) + [
+            ValueNode.random_int()
+        ])
+
+        if_node = self.random_comparison(random.choices(variables, k=2))
+        else_node = self.random_comparison(random.choices(variables, k=2))
+        
+        conditional = ConditionalNode(condition, if_node, else_node)
+
+        assignments = [
+            AssignmentNode.random_int(var)
+            for var in variables
+        ]
+        random.shuffle(assignments)
+
+        return SequenceNode(assignments + [ conditional ])
