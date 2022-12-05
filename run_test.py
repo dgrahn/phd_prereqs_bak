@@ -78,8 +78,10 @@ def run_test(args):
     model, pipe = getattr(sys.modules[__name__], func_name)()
 
     # Batch the pipeline
-    if not isinstance(pipe, spektral.data.loaders.Loader):
+    try:
         pipe = pipe.batch(BATCH_SIZE)
+    except:
+        print('Not batching, usually expected.')
 
     # Describe the model
     print(model.summary())
