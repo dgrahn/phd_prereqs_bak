@@ -2,9 +2,7 @@
 
 ## TODO
 * Identify failure conditions for successful training. They should be fully learnable problems as there is zero noise.
-* Try training CodeBERT with no frozen weights (running on fry now)
-* Simplify code
-
+    * Numbers that are close to each other are misidentified
 
 ## Results
 
@@ -15,7 +13,7 @@ Metric is binary accuracy, all datasets are balanced.
 | 1 | Simple MLP  | 🟢 0.9967 | 🟢 0.9955 | 🔴 0.5068 | 🔴 0.5080 | 🟡 0.5375 |
 | 2 | CNN + MLP   | 🟢 0.9970 | 🔴 0.5052 | 🔴 0.5068 | 🔴 0.5080 | 🔴 0.5027 |
 | 3 | LSTM + MLP  | 🟢 0.9936 | 🔴 0.5052 | 🔴 0.5068 | 🔴 0.5080 | 🔴 0.5027 |
-| 4 | CodeBERT    | ⚪ 0.5052 | ⚪ 0.5054 | ⚪ 0.5067 | ⚪ 0.xxxx | ⚪ 0.xxxx |
+| 4 | CodeBERT    | ⚪ 0.5052 | ⚪ 0.5054 | ⚪ 0.5067 | ⚪ 0.xxxx | 🔴 0.5049 |
 | 5 | GNN         | 🟢 0.9288 | 🟡 0.7259 | 🔴 0.5038 | 🔴 0.5026 | 🟡 0.5365 |
 
 ### Legend
