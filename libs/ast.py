@@ -116,7 +116,8 @@ class ConditionalNode(Node):
     else_node: Node
 
     def _evaluate(self, env):
-        if self.condition.evaluate(env):
+        self.was_true = self.condition.evaluate(env)
+        if self.was_true:
             return self.if_node.evaluate(env)
         else:
             return self.else_node.evaluate(env)
