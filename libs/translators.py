@@ -241,7 +241,7 @@ class NetworkXTranslator(Translator):
     def _variable_node(self, node:VariableNode, **kwargs) -> Any:
         is_assign = kwargs.pop('assign', False)
 
-        nid = self.add_node('VARIABLE', name=node.name, **kwargs)
+        nid = self.add_node('VARIABLE', nam=node.name, **kwargs)
 
         last_ref = self.last_refs[node.name]
         if last_ref and not is_assign:
