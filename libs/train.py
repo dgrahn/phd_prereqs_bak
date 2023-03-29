@@ -18,6 +18,8 @@ def do_train(model, pipe, batch_size, epochs=10, steps_per_epoch=10_000,
         print('-' * 30)
         print('Spektral loader identified, changing batch size to 1.')
         print('-' * 30)
+        steps_per_epoch *= batch_size
+        validation_steps *= batch_size
         batch_size = 1
 
     # Train the model
