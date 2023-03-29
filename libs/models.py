@@ -19,6 +19,46 @@ def model2_cnn(input_shape):
     outputs = tf.keras.layers.Dense(1, activation='sigmoid')(x)
     return tf.keras.Model(inputs=inputs, outputs=outputs)
 
+def model2_textcnn(input_shape):
+    feature_size, embed_size = input_shape
+    num_filters = 128
+    dropout_rate=0.5
+
+    inputs = tf.keras.Input(shape=input_shape, name='input_data')
+    embed = tf.keras.layers.Reshape((input_shape[0], input_shape[1], 1), name='add_channel')(inputs)#(embed)
+
+    pool_outputs = []
+    for filter_size in [3]:#[3, 4, 5]:
+        filter_shape = (filter_size, embed_size)
+        conv = tf.keras.layers.Conv2D(num_filters, filter_shape, strides=(1, 1), padding='valid',
+                                   data_format='channels_last', activation='relu',
+                                   kernel_initializer='glorot_normal',
+                                   bias_initializer=tf.keras.initializers.Constant(0.1),
+                                   name='convolution_{:d}'.format(filter_size))(embed)
+        max_pool_shape = (feature_size - filter_size + 1, 1)
+        pool = tf.keras.layers.MaxPool2D(pool_size=max_pool_shape,
+                                      strides=(1, 1), padding='valid',
+                                      data_format='channels_last',
+                                      name='max_pooling_{:d}'.format(filter_size))(conv)
+        pool_outputs.append(pool)
+
+    pool_outputs = tf.keras.layers.concatenate(pool_outputs, axis=-1, name='concatenate')
+    pool_outputs = tf.keras.layers.Flatten(data_format='channels_last', name='flatten')(pool_outputs)
+    pool_outputs = tf.keras.layers.Dropout(dropout_rate, name='dropout')(pool_outputs)
+
+    x = tf.keras.layers.Dense(64, activation='relu')(pool_outputs)
+    x = tf.keras.layers.Dense(32, activation='relu')(x)
+    x = tf.keras.layers.Dense(16, activation='relu')(x)
+
+    outputs = tf.keras.layers.Dense(1, activation='sigmoid',
+                                 kernel_initializer='glorot_normal',
+                                 bias_initializer=tf.keras.initializers.Constant(0.1),
+                                 kernel_regularizer='l2',
+                                 bias_regularizer='l2',
+                                 name='output')(x)
+    model = tf.keras.Model(inputs=inputs, outputs=outputs)
+    return model
+
 def model3_lstm(input_shape):
     inputs = tf.keras.Input(shape=input_shape)
     x = tf.keras.layers.LSTM(128)(inputs)
@@ -59,6 +99,10 @@ def model5_gnn(n_node_features, n_edge_features):
     X_1 = spektral.layers.ECCConv(32, activation='relu')([X_in, A_in, E_in])
     X_2 = spektral.layers.ECCConv(32, activation='relu')([X_1, A_in, E_in])
     X_3 = spektral.layers.GlobalSumPool()(X_2)
-    output = tf.keras.layers.Dense(1, activation='sigmoid')(X_3)
+
+    x = tf.keras.layers.Dense(64, activation='relu')(X_3)
+    x = tf.keras.layers.Dense(32, activation='relu')(x)
+    x = tf.keras.layers.Dense(16, activation='relu')(x)
+    output = tf.keras.layers.Dense(1, activation='sigmoid')(x)
 
     return tf.keras.models.Model(inputs=[X_in, A_in, E_in], outputs=output)

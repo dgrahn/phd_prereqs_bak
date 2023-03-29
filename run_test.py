@@ -9,8 +9,8 @@ import tensorflow as tf
 # Constants
 BATCH_SIZE = 32
 EPOCHS = 10
-STEPS_PER_EPOCH = 10_000
-VALIDATION_STEPS = 1_000
+STEPS_PER_EPOCH = 100
+VALIDATION_STEPS = 10
 
 def basic(task, **kwargs):
     trans = translators.BasicFeatureTranslator()
@@ -47,11 +47,11 @@ model1_task2 = lambda: (models.model1_mlp(TASK2_SHAPE), task2_basic())
 model1_task3 = lambda: (models.model1_mlp(TASK3_SHAPE), task3_basic())
 model1_task4 = lambda: (models.model1_mlp(TASK4_SHAPE), task4_basic())
 model1_task5 = lambda: (models.model1_mlp(TASK5_SHAPE), task5_basic())
-model2_task1 = lambda: (models.model2_cnn(TASK1_SHAPE), task1_basic())
-model2_task2 = lambda: (models.model2_cnn(TASK2_SHAPE), task2_basic())
-model2_task3 = lambda: (models.model2_cnn(TASK3_SHAPE), task3_basic())
-model2_task4 = lambda: (models.model2_cnn(TASK4_SHAPE), task4_basic())
-model2_task5 = lambda: (models.model2_cnn(TASK5_SHAPE), task5_basic())
+model2_task1 = lambda: (models.model2_textcnn(TASK1_SHAPE), task1_basic())
+model2_task2 = lambda: (models.model2_textcnn(TASK2_SHAPE), task2_basic())
+model2_task3 = lambda: (models.model2_textcnn(TASK3_SHAPE), task3_basic())
+model2_task4 = lambda: (models.model2_textcnn(TASK4_SHAPE), task4_basic())
+model2_task5 = lambda: (models.model2_textcnn(TASK5_SHAPE), task5_basic())
 model3_task1 = lambda: (models.model3_lstm(TASK1_SHAPE), task1_basic())
 model3_task2 = lambda: (models.model3_lstm(TASK2_SHAPE), task2_basic())
 model3_task3 = lambda: (models.model3_lstm(TASK3_SHAPE), task3_basic())
