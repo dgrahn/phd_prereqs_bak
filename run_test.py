@@ -9,8 +9,8 @@ import tensorflow as tf
 # Constants
 BATCH_SIZE = 32
 EPOCHS = 10
-STEPS_PER_EPOCH = 100
-VALIDATION_STEPS = 10
+STEPS_PER_EPOCH = 10_000
+VALIDATION_STEPS = 1_000
 
 def basic(task, **kwargs):
     trans = translators.BasicFeatureTranslator()
