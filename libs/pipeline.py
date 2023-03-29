@@ -79,7 +79,7 @@ def codebert_dataset(task, trans, batch_size):
         }, np.array(labels)
 
 def spektral_loader(task, trans, batch_size, epochs, train_size, test_size):
-    dataset = SpektralTaskDataset(task, trans, epochs=epochs, train_size=train_size, test_size=test_size)
+    dataset = SpektralTaskDataset(task, trans, epochs=epochs, train_size=batch_size * train_size, test_size=batch_size * test_size)
     print('# Graphs:', dataset.n_graphs)
     print('# Labels:', dataset.n_labels)
     print('# Node Features:', dataset.n_node_features)
