@@ -277,7 +277,7 @@ class SpektralTranslator(NetworkXTranslator):
 
         df_nodes = pd.DataFrame.from_dict(g.nodes, orient='index')
         self.map(df_nodes, 'label', SpektralTranslator.NODE_LABELS)
-        self.map(df_nodes, 'name', BasicFeatureTranslator.VARS, True)
+        self.map(df_nodes, 'nam', BasicFeatureTranslator.VARS, True)
         self.map(df_nodes, 'type', BasicFeatureTranslator.IDS, True)
         df_nodes.value = (df_nodes.value / 10_000).fillna(-2)
 
