@@ -156,7 +156,12 @@ class BasicFeatureTranslator(Translator):
         # feats[feats[:, 0] == self.NUMBER, 1] += 0.5
         feats[feats[:, 0] == self.OPERATOR, 1] /= len(self.IDS)
         feats[feats[:, 0] == self.VARIABLE, 1] /= len(self.VARS)
-        feats[:, 0] /= 2
+
+        feats = np.hstack([
+            pd.get_dummies(feats[:, 0]),
+            feats[:, 1:]
+            ])
+        # feats[:, 0] /= 2
         return feats
 
 
